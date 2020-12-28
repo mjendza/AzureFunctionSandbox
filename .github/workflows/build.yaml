@@ -1,0 +1,28 @@
+name: Build
+env:
+  OUTPUT_PATH: ${{ github.workspace }}/.output
+  DOTNET_VERSION: "3.1.100"
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@master
+
+      - name: Setup Dotnet ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Publish functions
+        run: dotnet publish --configuration Release --output ${{ env.OUTPUT_PATH }}
+
+      - name: Package functions
+        uses: actions/upload-artifact@v1
+        with:
+          name: functions
+          path: ${{ env.OUTPUT_PATH }}
+ 
