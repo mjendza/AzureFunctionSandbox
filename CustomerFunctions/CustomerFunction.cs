@@ -18,7 +18,8 @@ namespace CustomerFunctions
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
-
+            var env = Environment.GetEnvironmentVariable("environment");
+            log.LogInformation($"environment: {env}");
             string name = req.Query["name"];
 
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
