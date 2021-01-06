@@ -19,10 +19,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AzureFunctions.AcceptanceTest.Runner\AzureFunctions.AcceptanceTest.Runner.csproj" />
     <ProjectReference Include="..\CustomerFunctions\CustomerFunctions.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="appsettings.Debug.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Remove="appsettings.json" />
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

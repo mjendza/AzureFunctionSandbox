@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
+using AzureFunctions.AcceptanceTest.Runner;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -25,12 +26,15 @@ namespace AcceptanceTests
             {
                 case "remote":
                 {
-                    var url = Environment.GetEnvironmentVariable("url");
+                    var url = config["url"];
                     return await RestCall(data, url);
                 }
                 case "localhost":
                 {
                     var url = $"http://localhost:7071/api/";
+
+                    var functionRunner = new AzureFunctionCliInvoker();
+                    await functionRunner.RunAzureFunction();
                     return await RestCall(data, url);
                 }
                 case "debug":

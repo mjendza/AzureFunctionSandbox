@@ -34,7 +34,7 @@ namespace AcceptanceTests
         {
             var query = new Dictionary<string, StringValues>();
             var body = "{\"name\":\"yamada\"}";
-            var req = HttpRequestSetup(query, body);
+            var req = HttpRequestSetup(query, body, "get");
             var result = await AzureFunctionInvoker.Invoke((request) => CustomerFunction.Run(request, logger), req);
             var resultObject = (OkObjectResult) result;
             Assert.AreEqual("Hello, yamada. This HTTP triggered function executed successfully.", resultObject.Value);

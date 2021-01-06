@@ -13,7 +13,7 @@ namespace AcceptanceTests
 
         protected ILogger logger = TestLogger.Create();
 
-        public HttpRequest HttpRequestSetup(Dictionary<string, StringValues> query, string body)
+        public HttpRequest HttpRequestSetup(Dictionary<string, StringValues> query, string body, string verb)
         {
             var reqMock = new Mock<HttpRequest>();
 
@@ -24,6 +24,7 @@ namespace AcceptanceTests
             writer.Flush();
             stream.Position = 0;
             reqMock.Setup(req => req.Body).Returns(stream);
+            reqMock.Setup(x => x.Method).Returns(verb);
             return reqMock.Object;
         }
 
