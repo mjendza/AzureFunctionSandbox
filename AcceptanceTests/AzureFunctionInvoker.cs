@@ -35,7 +35,9 @@ namespace AcceptanceTests
 
                     var functionRunner = new AzureFunctionCliInvoker();
                     await functionRunner.RunAzureFunction();
-                    return await RestCall(data, url);
+                    var result = await RestCall(data, url);
+                    functionRunner.End();
+                    return result;
                 }
                 case "debug":
                 {

@@ -1,16 +1,28 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace AcceptanceTests
 {
     public abstract class FunctionTest
     {
-
+        [ClassInitialize]
+        public void ClassSetUp()
+        {
+            SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
+        }
+        
+        [TestInitialize]
+        public void TestSetUp()
+        {
+            SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
+        }
         protected ILogger logger = TestLogger.Create();
 
         public HttpRequest HttpRequestSetup(Dictionary<string, StringValues> query, string body, string verb)

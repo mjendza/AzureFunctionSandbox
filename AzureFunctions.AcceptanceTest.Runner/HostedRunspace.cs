@@ -6,11 +6,19 @@ using System.Threading.Tasks;
 
 namespace AzureFunctions.AcceptanceTest.Runner
 {
+    public class PowerShellParams
+    {
+        public string ScriptContents { get; set; }
+        public Dictionary<string, object> ScriptParameters { get; set; }
+        public EventHandler<DataAddedEventArgs> ErrorAdded { get; set; }
+    }
     /// <summary>
     /// Contains functionality for executing PowerShell scripts.
     /// </summary>
-    public class HostedRunspace : IDisposable
+    public class HostedRunspace 
     {
+        private IAsyncResult _result;
+
         public HostedRunspace()
         {
             InitializeRunspaces(2, 10, new string[]{});
@@ -19,7 +27,7 @@ namespace AzureFunctions.AcceptanceTest.Runner
         /// The PowerShell runspace pool.
         /// </summary>
         private RunspacePool RsPool { get; set; }
-     
+        private PowerShell ps { get; set; }
         /// <summary>
         /// Initialize the runspace pool.
         /// </summary>
@@ -62,7 +70,7 @@ namespace AzureFunctions.AcceptanceTest.Runner
         /// </summary>
         /// <param name="scriptContents">The script file contents.</param>
         /// <param name="scriptParameters">A dictionary of parameter names and parameter values.</param>
-        public async Task<PSDataCollection<PSObject>> RunScript(string scriptContents, Dictionary<string, object> scriptParameters)
+        public async Task<PSDataCollection<PSObject>> RunScript(PowerShellParams options)
         {
             if (RsPool == null)
             {
@@ -71,23 +79,28 @@ namespace AzureFunctions.AcceptanceTest.Runner
        
             // create a new hosted PowerShell instance using a custom runspace.
             // wrap in a using statement to ensure resources are cleaned up.
-            using (PowerShell ps = PowerShell.Create())
-            {
+            ps = PowerShell.Create();
+            
                 // use the runspace pool.
                 ps.RunspacePool = RsPool;
          
                 // specify the script code to run.
-                ps.AddScript(scriptContents);
+                ps.AddScript(options.ScriptContents);
          
                 // specify the parameters to pass into the script.
-                ps.AddParameters(scriptParameters);
+                ps.AddParameters(options.ScriptParameters);
          
                 // subscribe to events from some of the streams
                 ps.Streams.Error.DataAdded += Error_DataAdded;
+                ps.Streams.Error.DataAdded += options.ErrorAdded;
                 ps.Streams.Warning.DataAdded += Warning_DataAdded;
+                ps.Streams.Warning.DataAdded += options.ErrorAdded;
                 ps.Streams.Information.DataAdded += Information_DataAdded;
+                ps.Streams.Information.DataAdded += options.ErrorAdded;
+                
          
                 // execute the script and await the result.
+                
                 var pipelineObjects = await ps.InvokeAsync().ConfigureAwait(false);
          
                 // print the resulting pipeline objects to the console.
@@ -98,8 +111,8 @@ namespace AzureFunctions.AcceptanceTest.Runner
                 }
 
                 return pipelineObjects;
-            }
-        }
+        }   
+        
      
         /// <summary>
         /// Handles data-added events for the information stream.
@@ -147,8 +160,9 @@ namespace AzureFunctions.AcceptanceTest.Runner
             Console.WriteLine($"ErrorStreamEvent: {currentStreamRecord.Exception}");
         }
 
-        public void Dispose()
+        public void Finish()
         {
+            ps.Stop();
             RsPool.Close();
         }
     }
