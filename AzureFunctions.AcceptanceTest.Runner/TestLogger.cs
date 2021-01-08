@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
 
-namespace AcceptanceTests
+namespace AzureFunctions.AcceptanceTest.Runner
 {
     public static class TestLogger
     {

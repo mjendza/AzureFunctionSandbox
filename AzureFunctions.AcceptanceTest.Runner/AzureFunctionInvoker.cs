@@ -1,15 +1,13 @@
 ﻿using System;
 using System.IO;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Threading.Tasks;
-using AzureFunctions.AcceptanceTest.Runner;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using RestSharp;
 
-namespace AcceptanceTests
+namespace AzureFunctions.AcceptanceTest.Runner
 {
     public static class AzureFunctionInvoker
     {
@@ -31,13 +29,7 @@ namespace AcceptanceTests
                 }
                 case "localhost":
                 {
-                    var url = $"http://localhost:7071/api/";
-
-                    var functionRunner = new AzureFunctionCliInvoker();
-                    await functionRunner.RunAzureFunction();
-                    var result = await RestCall(data, url);
-                    functionRunner.End();
-                    return result;
+                    throw new NotImplementedException("Need to implement this feature...");
                 }
                 case "debug":
                 {
@@ -79,26 +71,6 @@ namespace AcceptanceTests
             }
 
             throw new NotImplementedException($"Not Supported Method: {method}");
-        }
-
-        private static FunctionParameters GetParams(Expression<Func<HttpRequest, Task<IActionResult>>> func)
-        {
-            var debug = GetDebugView(func);
-            return new FunctionParameters()
-            {
-                Endpoint = "customer",
-                Verbs = new[] {"get", "post"}
-            };
-        }
-
-        public static string GetDebugView(Expression exp)
-        {
-            if (exp == null)
-                return null;
-
-            var propertyInfo =
-                typeof(Expression).GetProperty("DebugView", BindingFlags.Instance | BindingFlags.NonPublic);
-            return propertyInfo.GetValue(exp) as string;
         }
     }
 
