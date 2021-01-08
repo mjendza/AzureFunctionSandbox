@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AcceptanceTests", "Acceptan
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureFunctions.AcceptanceTest.Runner", "AzureFunctions.AcceptanceTest.Runner\AzureFunctions.AcceptanceTest.Runner.csproj", "{1C603F55-2144-4B7B-89AE-4E2E5FE82AF7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{4CC04E18-5D0F-4E33-98D1-EF25D6AD6A3A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{1C603F55-2144-4B7B-89AE-4E2E5FE82AF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C603F55-2144-4B7B-89AE-4E2E5FE82AF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C603F55-2144-4B7B-89AE-4E2E5FE82AF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CC04E18-5D0F-4E33-98D1-EF25D6AD6A3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CC04E18-5D0F-4E33-98D1-EF25D6AD6A3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CC04E18-5D0F-4E33-98D1-EF25D6AD6A3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CC04E18-5D0F-4E33-98D1-EF25D6AD6A3A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

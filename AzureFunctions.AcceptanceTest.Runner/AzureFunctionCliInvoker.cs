@@ -11,19 +11,21 @@ namespace AzureFunctions.AcceptanceTest.Runner
     public class AzureFunctionCliInvoker
     {
         private HostedRunspace _hosted;
-        private string RunFunction => "func start --build";
+        private string RunFunction => "func start";
+        private string RunWithBuild => $"{RunFunction} --build";
 
         public async Task RunAzureFunction()
         {
             _hosted = new HostedRunspace();
             var scriptContents = new StringBuilder();
             scriptContents.AppendLine("Param($StrParam, $IntParam)");
+            //scriptContents.AppendLine("Set-ExecutionPolicy ByPass");
             scriptContents.AppendLine("");
-            scriptContents.AppendLine("Write-Output \"Starting script\"");
-            scriptContents.AppendLine("Write-Output \"This is the value from the first param: $StrParam\"");
-            scriptContents.AppendLine("Write-Output \"This is the value from the second param: $IntParam\"");
+            //scriptContents.AppendLine("Write-Output \"Starting script\"");
+            //scriptContents.AppendLine("Write-Output \"This is the value from the first param: $StrParam\"");
+            //scriptContents.AppendLine("Write-Output \"This is the value from the second param: $IntParam\"");
             scriptContents.AppendLine("");
-            scriptContents.AppendLine(@"set-location ..\..\..\..\CustomerFunctions\");
+            scriptContents.AppendLine($" ../../../../CustomerFunctions/{RunWithBuild}");
             scriptContents.AppendLine(RunFunction);
             scriptContents.AppendLine("");
 
