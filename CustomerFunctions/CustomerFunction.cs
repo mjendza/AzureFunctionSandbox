@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace CustomerFunctions
 {
-    public static class Function1
+    public static class CustomerFunction
     {
         [FunctionName("customer")]
         public static async Task<IActionResult> Run(
