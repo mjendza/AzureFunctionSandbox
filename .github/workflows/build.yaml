@@ -66,9 +66,7 @@ jobs:
     - name: Dotnet Pack
       shell: bash
       run: |
-        dotnet pack /p:Version=${{ steps.get_version.outputs.version }} --configuration=Release --output=./packages \          
-          /p:RepositoryUrl=https://github.com/mjendza/AzureFunctionSandbox \
-          /p:RepositoryType=git
+        dotnet pack /p:Version=${{ steps.get_version.outputs.version }} --configuration=Release --output=./packages
     - name: Publish Artifacts
       uses: actions/upload-artifact@v1
       with:
