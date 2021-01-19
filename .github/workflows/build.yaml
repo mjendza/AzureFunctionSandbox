@@ -8,7 +8,7 @@ on: [push]
 jobs:
   vulnerability-scan:
     runs-on: ubuntu-latest
-    name: ci/github/scan-vulnerabilities
+    name: scan-vulnerabilities
     container: mcr.microsoft.com/dotnet/core/sdk:3.1-bionic
     steps:
     - name: Checkout
@@ -20,9 +20,13 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    name: build
     steps:
-      - name: "Checkout"
-        uses: actions/checkout@master
+      - name: Checkout
+        uses: actions/checkout@v2
+      - shell: bash
+        run: |
+          git fetch --prune --unshallow
 
       - name: Setup Dotnet ${{ env.DOTNET_VERSION }}
         uses: actions/setup-dotnet@v1
@@ -40,7 +44,7 @@ jobs:
   publish:
     needs: [vulnerability-scan, build]
     runs-on: ubuntu-latest
-    name: ci/github/publish
+    name: publish nuget
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -62,8 +66,7 @@ jobs:
     - name: Dotnet Pack
       shell: bash
       run: |
-        dotnet pack /p:Version=${{ steps.get_version.outputs.version }} --configuration=Release --output=./packages \
-
+        dotnet pack /p:Version=${{ steps.get_version.outputs.version }} --configuration=Release --output=./packages 
     - name: Publish Artifacts
       uses: actions/upload-artifact@v1
       with:
