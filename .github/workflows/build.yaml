@@ -32,7 +32,10 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-
+      - name: dotnet build
+        shell: bash
+        run: |
+          dotnet build --configuration Release
       - name: Publish functions
         run: dotnet publish --configuration Release --output ${{ env.OUTPUT_PATH }}
 
