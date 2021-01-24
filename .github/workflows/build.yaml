@@ -82,7 +82,6 @@ jobs:
         name: nuget-packages
     - name: Dotnet Push to Nuget.org
       shell: bash
-      if: contains(steps.get_version.outputs.branch, 'v')
       run: |
         dotnet tool restore
         find . -name "*.nupkg" | xargs -n1 dotnet nuget push --api-key=${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json        
