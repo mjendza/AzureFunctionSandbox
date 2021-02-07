@@ -51,6 +51,9 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+    - shell: bash
+      run: |
+        git fetch --prune --unshallow
     - name: Get Version
       id: get_version
       run: | 
@@ -59,9 +62,7 @@ jobs:
         dotnet tool restore
         version=$(dotnet tool run minver -- --tag-prefix=v)
         echo "::set-output name=version::${version}"
-    - shell: bash
-      run: |
-        git fetch --prune --unshallow
+
     - name: Setup Dotnet
       uses: actions/setup-dotnet@v1
       with:
