@@ -12,8 +12,7 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@master
 
-      - name: dotnet tools
-        uses: actions/setup-dotnet@v1
+      - name: dotnet tools run
         run: | 
           dotnet tool restore 
           dotnet format --check
