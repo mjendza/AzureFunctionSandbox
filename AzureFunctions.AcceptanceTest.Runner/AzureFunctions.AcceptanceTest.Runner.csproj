@@ -2,14 +2,14 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>0.1.0</PackageVersion>
+        <PackageVersion></PackageVersion>
         <Title>Azure Functions Acceptance Test Helpers</Title>
         <Description>The Azure Function Acceptance Tests Helpers to run remote, in-memory tests</Description>
         <PackageProjectUrl>https://github.com/mjendza/AzureFunctionSandbox</PackageProjectUrl>
         <RepositoryUrl>https://github.com/mjendza/AzureFunctionSandbox</RepositoryUrl>
         <PackageTags>azurefunctions acceptancetests</PackageTags>
 		<PackageId>AzureFunctions.AcceptanceTestRunner</PackageId>
+
     </PropertyGroup>
 
     <ItemGroup>

@@ -69,12 +69,12 @@ jobs:
     - name: Dotnet build to pack
       shell: bash
       run: |
-        dotnet build "./AzureFunctions.AcceptanceTest.Runner/AzureFunctions.AcceptanceTest.Runner.csproj" --configuration=Release
+        dotnet build "./AzureFunctions.AcceptanceTest.Runner/AzureFunctions.AcceptanceTest.Runner.csproj" --configuration=Release /p:Version=${{ steps.get_version.outputs.version }}
         
     - name: Dotnet Pack
       shell: bash
       run: |
-        dotnet pack "./AzureFunctions.AcceptanceTest.Runner/AzureFunctions.AcceptanceTest.Runner.csproj" -p:Version=${{ steps.get_version.outputs.version }} --configuration=Release --output=./packages
+        dotnet pack "./AzureFunctions.AcceptanceTest.Runner/AzureFunctions.AcceptanceTest.Runner.csproj" --configuration=Release /p:Version=${{ steps.get_version.outputs.version }} --output=./packages
     - name: Publish Artifacts
       uses: actions/upload-artifact@v1
       with:
