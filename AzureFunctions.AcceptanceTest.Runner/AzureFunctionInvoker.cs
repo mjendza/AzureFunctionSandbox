@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -9,6 +9,13 @@ using RestSharp;
 
 namespace AzureFunctions.AcceptanceTest.Runner
 {
+    using System.Collections.Generic;
+    using System.Text;
+    using Microsoft.AspNetCore.Http.Features;
+    using Microsoft.AspNetCore.Http.Internal;
+    using Microsoft.Extensions.Primitives;
+    using Newtonsoft.Json;
+
     public static class AzureFunctionInvoker
     {
         public static async Task<IActionResult> Invoke(Expression<Func<HttpRequest, Task<IActionResult>>> func,
@@ -29,7 +36,9 @@ namespace AzureFunctions.AcceptanceTest.Runner
                 }
                 case "localhost":
                 {
-                    throw new NotImplementedException("Need to implement this feature...");
+                    var url = config["url"];
+                    return await RestCall(data, url);
+                    //throw new NotImplementedException("Need to implement this feature...");
                 }
                 case "debug":
                 {
@@ -50,12 +59,22 @@ namespace AzureFunctions.AcceptanceTest.Runner
             }
 
             var client = new RestClient(url);
-            var request = new RestRequest($"customer", FromString(data.Method));
-            StreamReader reader = new StreamReader(data.Body);
-            string text = await reader.ReadToEndAsync();
-            request.AddJsonBody(text);
+            var request = new RestRequest($"", FromString(data.Method));
+            var reader = new StreamReader(data.Body);
+            var text = await reader.ReadToEndAsync();
+            dynamic jsonResponse = JsonConvert.DeserializeObject(text);
+            if (!string.IsNullOrEmpty(text))
+            {
+                request.AddParameter("application/json", text, ParameterType.RequestBody);
+            }
+
             var result = await client.ExecuteAsync(request);
-            return new ActionResult<object>(result.Content).Result;
+            if (!result.IsSuccessful)
+            {
+                throw new Exception(result.StatusCode.ToString());
+            }
+
+            return new OkObjectResult(result.Content);
         }
 
         private static Method FromString(string method)
@@ -78,5 +97,32 @@ namespace AzureFunctions.AcceptanceTest.Runner
     {
         public string Endpoint { get; set; }
         public string[] Verbs { get; set; }
+    }
+
+    public static class HttpRequestFactory
+    {
+        public static HttpRequest HttpRequestSetup(Dictionary<string, StringValues> queryData, object body, string verb)
+        {
+            var queryCollection = new QueryCollection(queryData);
+            var query = new QueryFeature(queryCollection);
+
+            var features = new FeatureCollection();
+            features.Set<IQueryFeature>(query);
+            var request = new HttpRequestFeature()
+            {
+                Method = verb,
+
+            };
+            if (body != null)
+            {
+                var json = JsonConvert.SerializeObject(body);
+                request.Body = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            }
+
+            features.Set<IHttpRequestFeature>(request);
+
+            var httpContext = new DefaultHttpContext(features);
+            return httpContext.Request;
+        }
     }
 }
