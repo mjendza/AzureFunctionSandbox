@@ -1,12 +1,30 @@
 {
-  "version": 1,
-  "isRoot": true,
-  "tools": {
-    "dotnet-format": {
-      "version": "4.1.131201",
-      "commands": [
-        "dotnet-format"
-      ]
+    "version": 1,
+    "isRoot": true,
+    "tools": {
+      "dotnet-format": {
+        "version": "4.1.131201",
+        "commands": [
+          "dotnet-format"
+        ]
+      },
+      "minver-cli": {
+        "version": "2.2.0",
+        "commands": [
+          "minver"
+        ]
+      },
+      "dotnet-retire": {
+        "version": "4.0.1",
+        "commands": [
+          "dotnet-retire"
+        ]
+      },
+      "gpr": {
+        "version": "0.1.122",
+        "commands": [
+          "gpr"
+        ]
+      }
     }
   }
-}
