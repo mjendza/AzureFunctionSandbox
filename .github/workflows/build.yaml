@@ -29,8 +29,8 @@ jobs:
           git fetch --prune --unshallow
 
       - name: dotnet tools run
-        run: | 
-          dotnet tool restore 
+        run: |
+          dotnet tool restore
           dotnet format --check
 
       - name: Setup Dotnet ${{ env.DOTNET_VERSION }}
@@ -60,11 +60,11 @@ jobs:
         fetch-depth: 0
     - name: Get Version
       id: get_version
-      run: | 
+      run: |
         echo "::set-output name=branch::${GITHUB_REF:10}"
-        
+
         dotnet tool restore
-        version=$(dotnet tool run minver -- --tag-prefix=v)
+        version=$(dotnet tool run minver --tag-prefix v)
         echo "::set-output name=version::${version}"
 
     - name: Setup Dotnet
@@ -75,7 +75,7 @@ jobs:
       shell: bash
       run: |
         dotnet build "./AzureFunctions.AcceptanceTest.Runner/AzureFunctions.AcceptanceTest.Runner.csproj" --configuration=Release /p:Version=${{ steps.get_version.outputs.version }}
-        
+
     - name: Dotnet Pack
       shell: bash
       run: |
@@ -89,6 +89,5 @@ jobs:
       shell: bash
       run: |
         dotnet tool restore
-        find . -name "*.nupkg" | xargs -n1 dotnet nuget push --api-key=${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json        
-          
- 
+        find . -name "*.nupkg" | xargs -n1 dotnet nuget push --api-key=${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+
