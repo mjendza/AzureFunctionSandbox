@@ -8,13 +8,13 @@ using Microsoft.Extensions.Configuration;
 using RestSharp;
 using ExpressionTreeToString;
 using Newtonsoft.Json;
+using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using Microsoft.Azure.WebJobs;
 
 namespace AzureFunctions.AcceptanceTest.Runner
 {
-    using System.Linq;
-    using System.Text.RegularExpressions;
-    using Microsoft.Azure.WebJobs;
-
     public static class AzureFunctionInvoker
     {
         public static async Task<IActionResult> Invoke(Expression<Func<HttpRequest, Task<IActionResult>>> func,
@@ -29,14 +29,10 @@ namespace AzureFunctions.AcceptanceTest.Runner
             switch (stage)
             {
                 case "remote":
-                {
-                    var url = config["url"];
-                    return await RestCall(data, url);
-                }
                 case "localhost":
                 {
-                    var url = config["url"];
-                    var u = GetUrl(func);
+                    var key = GetConfigurationUrlKeyNameForFunction(func);
+                    var url = config[key];
                     return await RestCall(data, url);
                 }
                 case "debug":
@@ -50,7 +46,7 @@ namespace AzureFunctions.AcceptanceTest.Runner
             }
         }
 
-        private static string GetUrl(Expression<Func<HttpRequest, Task<IActionResult>>> func)
+        private static string GetConfigurationUrlKeyNameForFunction(Expression<Func<HttpRequest, Task<IActionResult>>> func)
         {
             var asString = func.ToString("DebugView");
 
@@ -66,13 +62,19 @@ namespace AzureFunctions.AcceptanceTest.Runner
             {
                 throw new ArgumentException("Can't find the calling Azure Function handler.");
             }
-            var assemblyName = names.First();
-            var classWithNameSpace = string.Join(".", names.Skip(1));
-            var typeYouWant = Type.GetType($"{classWithNameSpace}, {assemblyName}");
-            var name = typeYouWant
-                .GetAttributeValue((FunctionNameAttribute dna) => dna.Name);
 
-            return name;
+            var namesReverted = names.Reverse().ToArray();
+            var methodName = namesReverted.First();
+            var typeYouWant = FindType(namesReverted.Skip(1).First());
+
+            if (typeYouWant == null)
+            {
+                throw new ArgumentException("There is no type for handler.Please create a PR with suggestion how to fix it.");
+            }
+
+            var name = typeYouWant.GetMethod(methodName).GetCustomAttribute<FunctionNameAttribute>();
+
+            return name.Name;
         }
 
         private static async Task<IActionResult> RestCall(HttpRequest data, string url)
@@ -86,19 +88,24 @@ namespace AzureFunctions.AcceptanceTest.Runner
             var request = new RestRequest($"", FromString(data.Method));
             var reader = new StreamReader(data.Body);
             var text = await reader.ReadToEndAsync();
-            dynamic jsonResponse = JsonConvert.DeserializeObject(text);
             if (!string.IsNullOrEmpty(text))
             {
                 request.AddParameter("application/json", text, ParameterType.RequestBody);
             }
+            if (data.Query.Count>0)
+            {
+                foreach (var item in data.Query)
+                {
+                    request.AddQueryParameter(item.Key, item.Value);
+                }
 
+            }
             var result = await client.ExecuteAsync(request);
             if (!result.IsSuccessful)
             {
                 throw new Exception(result.StatusCode.ToString());
             }
-
-            return new OkObjectResult(result.Content);
+            return new JsonResult(JsonConvert.DeserializeObject(result.Content));
         }
 
         private static Method FromString(string method)
@@ -116,35 +123,12 @@ namespace AzureFunctions.AcceptanceTest.Runner
             throw new NotImplementedException($"Not Supported Method: {method}");
         }
 
-        private static Type FindType(string fullName)
-        {
-            return
-                AppDomain.CurrentDomain.GetAssemblies()
-                    .Where(a => !a.IsDynamic)
-                    .SelectMany(a => a.GetTypes())
-                    .FirstOrDefault(t => t.FullName.Equals(fullName));
-        }
+        private static Type FindType(string fullName) =>
+            AppDomain.CurrentDomain.GetAssemblies()
+                .Where(a => !a.IsDynamic)
+                .SelectMany(a => a.GetTypes())
+                .FirstOrDefault(t => t.FullName.EndsWith(fullName));
     }
-
-    public static class AttributeExtensions
-    {
-        public static TValue GetAttributeValue<TAttribute, TValue>(
-            this Type type,
-            Func<TAttribute, TValue> valueSelector)
-            where TAttribute : Attribute
-        {
-            var att = type.GetCustomAttributes(
-                typeof(TAttribute), true
-            ).FirstOrDefault() as TAttribute;
-            if (att != null)
-            {
-                return valueSelector(att);
-            }
-            return default(TValue);
-        }
-    }
-
-
 
     public class FunctionParameters
     {

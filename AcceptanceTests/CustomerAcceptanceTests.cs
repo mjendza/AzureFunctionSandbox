@@ -12,7 +12,7 @@ namespace AcceptanceTests
     public class CustomerAcceptanceTests : BaseFunctionAcceptanceTests
     {
         [TestMethod]
-        public async Task WhenCallCustomerGetWithBody_ShouldReturn200_WithResult()
+        public async Task WhenJsonCallCustomerPostWithBody_ShouldReturn200_WithJsonResult()
         {
             //given
             var query = new Dictionary<string, StringValues>();
@@ -20,32 +20,34 @@ namespace AcceptanceTests
                 new {
                     name = "yamada",
                 };
-            var req = HttpRequestFactory.HttpRequestSetup(query, body, "get");
+            var req = HttpRequestFactory.HttpRequestSetup(query, body, "POST");
 
             //when
             var result = await AzureFunctionInvoker.Invoke((request) => CustomerFunction.Run(request, logger), req);
 
             //then
-            var resultObject = (OkObjectResult)result;
+            var resultObject = (JsonResult)result;
             Assert.IsNotNull(resultObject, "Result object as OkObjectResult can't be null");
-            Assert.AreEqual("Hello, yamada. This HTTP triggered function executed successfully.", resultObject.Value);
+            dynamic jsonResult = resultObject.Value;
+            Assert.AreEqual("Hello, yamada. This HTTP triggered function executed successfully.", jsonResult.value.ToString());
         }
 
         [TestMethod]
-        public async Task WhenCallCustomerGetWithQuery_ShouldReturn200_WithResult()
+        public async Task WhenCallCustomerGetWithQuery_ShouldReturn200_WithJsonResult()
         {
             //given
             var query = new Dictionary<string, StringValues>();
             query.Add("name", "yamada");
-            var req = HttpRequestFactory.HttpRequestSetup(query, null, "get");
+            var req = HttpRequestFactory.HttpRequestSetup(query, null, "GET");
 
             //when
             var result = await AzureFunctionInvoker.Invoke((request) => CustomerFunction.Run(request, logger), req);
 
             //then
-            var resultObject = (OkObjectResult)result;
+            var resultObject = (JsonResult)result;
             Assert.IsNotNull(resultObject, "Result object as OkObjectResult can't be null");
-            Assert.AreEqual("Hello, yamada. This HTTP triggered function executed successfully.", resultObject.Value);
+            dynamic jsonResult = resultObject.Value;
+            Assert.AreEqual("Hello, yamada. This HTTP triggered function executed successfully.", jsonResult.value.ToString());
         }
     }
 }
