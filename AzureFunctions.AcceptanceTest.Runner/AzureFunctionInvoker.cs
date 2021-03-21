@@ -6,15 +6,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using RestSharp;
+using ExpressionTreeToString;
+using Newtonsoft.Json;
 
 namespace AzureFunctions.AcceptanceTest.Runner
 {
-    using System.Collections.Generic;
-    using System.Text;
-    using Microsoft.AspNetCore.Http.Features;
-    using Microsoft.AspNetCore.Http.Internal;
-    using Microsoft.Extensions.Primitives;
-    using Newtonsoft.Json;
+    using System.Linq;
+    using System.Text.RegularExpressions;
+    using Microsoft.Azure.WebJobs;
 
     public static class AzureFunctionInvoker
     {
@@ -37,8 +36,8 @@ namespace AzureFunctions.AcceptanceTest.Runner
                 case "localhost":
                 {
                     var url = config["url"];
+                    var u = GetUrl(func);
                     return await RestCall(data, url);
-                    //throw new NotImplementedException("Need to implement this feature...");
                 }
                 case "debug":
                 {
@@ -49,6 +48,31 @@ namespace AzureFunctions.AcceptanceTest.Runner
                     throw new ArgumentException("Please set stage variable to run acceptance tests.");
                 }
             }
+        }
+
+        private static string GetUrl(Expression<Func<HttpRequest, Task<IActionResult>>> func)
+        {
+            var asString = func.ToString("DebugView");
+
+            var regex = new Regex(@".Call(.*)\(");
+            var v = regex.Match(asString);
+            if (v.Groups.Count != 2)
+            {
+                throw new ArgumentException("Can't find the calling Azure Function handler.");
+            }
+            var s = v.Groups[1].ToString();
+            var names = s.Split(".");
+            if (names.Count() < 2)
+            {
+                throw new ArgumentException("Can't find the calling Azure Function handler.");
+            }
+            var assemblyName = names.First();
+            var classWithNameSpace = string.Join(".", names.Skip(1));
+            var typeYouWant = Type.GetType($"{classWithNameSpace}, {assemblyName}");
+            var name = typeYouWant
+                .GetAttributeValue((FunctionNameAttribute dna) => dna.Name);
+
+            return name;
         }
 
         private static async Task<IActionResult> RestCall(HttpRequest data, string url)
@@ -91,38 +115,40 @@ namespace AzureFunctions.AcceptanceTest.Runner
 
             throw new NotImplementedException($"Not Supported Method: {method}");
         }
+
+        private static Type FindType(string fullName)
+        {
+            return
+                AppDomain.CurrentDomain.GetAssemblies()
+                    .Where(a => !a.IsDynamic)
+                    .SelectMany(a => a.GetTypes())
+                    .FirstOrDefault(t => t.FullName.Equals(fullName));
+        }
     }
+
+    public static class AttributeExtensions
+    {
+        public static TValue GetAttributeValue<TAttribute, TValue>(
+            this Type type,
+            Func<TAttribute, TValue> valueSelector)
+            where TAttribute : Attribute
+        {
+            var att = type.GetCustomAttributes(
+                typeof(TAttribute), true
+            ).FirstOrDefault() as TAttribute;
+            if (att != null)
+            {
+                return valueSelector(att);
+            }
+            return default(TValue);
+        }
+    }
+
+
 
     public class FunctionParameters
     {
         public string Endpoint { get; set; }
         public string[] Verbs { get; set; }
-    }
-
-    public static class HttpRequestFactory
-    {
-        public static HttpRequest HttpRequestSetup(Dictionary<string, StringValues> queryData, object body, string verb)
-        {
-            var queryCollection = new QueryCollection(queryData);
-            var query = new QueryFeature(queryCollection);
-
-            var features = new FeatureCollection();
-            features.Set<IQueryFeature>(query);
-            var request = new HttpRequestFeature()
-            {
-                Method = verb,
-
-            };
-            if (body != null)
-            {
-                var json = JsonConvert.SerializeObject(body);
-                request.Body = new MemoryStream(Encoding.UTF8.GetBytes(json));
-            }
-
-            features.Set<IHttpRequestFeature>(request);
-
-            var httpContext = new DefaultHttpContext(features);
-            return httpContext.Request;
-        }
     }
 }
