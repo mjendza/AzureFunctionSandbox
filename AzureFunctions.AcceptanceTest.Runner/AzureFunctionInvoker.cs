@@ -1,17 +1,17 @@
-﻿using System;
+using System;
 using System.IO;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using RestSharp;
-using ExpressionTreeToString;
-using Newtonsoft.Json;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using ExpressionTreeToString;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using RestSharp;
 
 namespace AzureFunctions.AcceptanceTest.Runner
 {
@@ -92,7 +92,7 @@ namespace AzureFunctions.AcceptanceTest.Runner
             {
                 request.AddParameter("application/json", text, ParameterType.RequestBody);
             }
-            if (data.Query.Count>0)
+            if (data.Query.Count > 0)
             {
                 foreach (var item in data.Query)
                 {

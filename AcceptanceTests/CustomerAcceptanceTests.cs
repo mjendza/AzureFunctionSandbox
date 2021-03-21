@@ -17,7 +17,8 @@ namespace AcceptanceTests
             //given
             var query = new Dictionary<string, StringValues>();
             var body =
-                new {
+                new
+                {
                     name = "yamada",
                 };
             var req = HttpRequestFactory.HttpRequestSetup(query, body, "POST");

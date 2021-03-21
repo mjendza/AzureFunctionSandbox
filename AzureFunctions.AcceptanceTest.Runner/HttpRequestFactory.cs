@@ -1,4 +1,4 @@
-﻿namespace AzureFunctions.AcceptanceTest.Runner
+namespace AzureFunctions.AcceptanceTest.Runner
 {
     using System.Collections.Generic;
     using System.IO;
