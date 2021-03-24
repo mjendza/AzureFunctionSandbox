@@ -2,7 +2,7 @@
 # Howto use it
 ## Acceptance test (MSTest) - check the AcceptanceTests project 
 ```
-[TestMethod]
+        [TestMethod]
         public async Task WhenJsonCallCustomerPostWithBody_ShouldReturn200_WithJsonResult()
         {
             //given
