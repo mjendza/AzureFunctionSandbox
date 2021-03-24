@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace CustomerFunctions
 {
-    public static class Function1
+    public static class CustomerFunction
     {
         [FunctionName("customer")]
         public static async Task<IActionResult> Run(
@@ -30,7 +30,10 @@ namespace CustomerFunctions
                 ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
                 : $"Hello, {name}. This HTTP triggered function executed successfully.";
 
-            return new OkObjectResult(responseMessage);
+            return new JsonResult(new
+            {
+                value = responseMessage
+            });
         }
     }
 }
